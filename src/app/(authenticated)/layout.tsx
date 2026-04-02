@@ -15,12 +15,18 @@ export default function AuthenticatedLayout({
   const { user, setUser } = useAuthStore()
 
   useEffect(() => {
-    // Phase 1-2: auto-login with dummy user if no user set
-    // Will be replaced with Supabase session check
-    if (!user) {
+    // Check if auth cookie exists
+    const hasAuthCookie = document.cookie
+      .split('; ')
+      .some((c) => c.startsWith('yoshida-os-auth='))
+
+    if (!user && hasAuthCookie) {
+      // Restore user from cookie (dummy for now)
       setUser(dummyUser)
+    } else if (!user && !hasAuthCookie) {
+      router.push('/login')
     }
-  }, [user, setUser])
+  }, [user, setUser, router])
 
   if (!user) return null
 
