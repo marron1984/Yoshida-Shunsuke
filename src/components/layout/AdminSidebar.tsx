@@ -10,6 +10,8 @@ const adminNav = [
   { href: '/admin/knowledge', label: 'ナレッジ', exact: false },
   { href: '/admin/persona', label: '人格設定', exact: false },
   { href: '/admin/relationships', label: '接し方設定', exact: false },
+  { href: '/admin/conversations', label: '会話ログ', exact: false },
+  { href: '/admin/changelog', label: '変更履歴', exact: false },
 ]
 
 export function AdminSidebar() {
@@ -48,21 +50,6 @@ export function AdminSidebar() {
           })}
         </ul>
 
-        {/* Phase 4-5 items grayed out */}
-        <div className="mt-6 border-t border-navy-800 pt-3">
-          <p className="mb-2 px-3 text-[10px] uppercase tracking-wider text-navy-700">
-            Coming soon
-          </p>
-          <ul className="space-y-0.5">
-            {['会話ログ', '変更履歴'].map((label) => (
-              <li key={label}>
-                <span className="block cursor-not-allowed rounded-md px-3 py-2 text-sm text-navy-700">
-                  {label}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
       </nav>
 
       <div className="border-t border-navy-800 px-5 py-3">
