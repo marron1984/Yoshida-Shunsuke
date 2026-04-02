@@ -15,6 +15,7 @@
 4. `MEMORY_INGESTION.md`
 5. `RESPONSE_ENGINE.md`
 6. `ADMIN_CONSOLE.md`
+7. `CLAUDE_EXECUTION_TEMPLATE.md` — 実行手順テンプレート
 
 ---
 
