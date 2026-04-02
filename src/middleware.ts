@@ -1,24 +1,30 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+const PROTECTED_PATHS = ['/chat', '/home', '/admin']
+const PUBLIC_PATHS = ['/login', '/auth']
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Phase 1: dummy auth check via cookie
-  // Will be replaced with Supabase session check later
-  const isAuthenticated = request.cookies.get('yoshida-os-auth')?.value === 'true'
+  // Supabase stores session in cookies; check for auth tokens
+  const hasSession =
+    request.cookies.has('sb-access-token') ||
+    request.cookies.has('sb-refresh-token') ||
+    // Supabase SSR uses project-specific cookie names
+    Array.from(request.cookies.getAll()).some((c) =>
+      c.name.startsWith('sb-') && c.name.endsWith('-auth-token')
+    )
 
   // Protect authenticated routes
-  if (pathname.startsWith('/chat') || pathname.startsWith('/home') || pathname.startsWith('/admin')) {
-    // In development, allow access without auth for easier testing
-    // In production, uncomment the redirect below
-    // if (!isAuthenticated) {
-    //   return NextResponse.redirect(new URL('/login', request.url))
-    // }
+  const isProtected = PROTECTED_PATHS.some((p) => pathname.startsWith(p))
+  if (isProtected && !hasSession) {
+    return NextResponse.redirect(new URL('/login', request.url))
   }
 
   // Redirect authenticated users away from login
-  if (pathname === '/login' && isAuthenticated) {
+  const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p))
+  if (isPublic && hasSession && pathname === '/login') {
     return NextResponse.redirect(new URL('/chat', request.url))
   }
 
