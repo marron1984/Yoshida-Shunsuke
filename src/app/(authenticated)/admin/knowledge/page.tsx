@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { dummyKnowledge } from '@/lib/dummy-knowledge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -39,6 +40,7 @@ function ImportanceDots({ level }: { level: number }) {
 }
 
 export default function KnowledgeListPage() {
+  const router = useRouter()
   const [search, setSearch] = useState('')
   const [filterCat, setFilterCat] = useState<FilterCat>('all')
 
@@ -151,6 +153,7 @@ export default function KnowledgeListPage() {
                   {filtered.map((k) => (
                     <tr
                       key={k.id}
+                      onClick={() => router.push(`/admin/knowledge/${k.id}`)}
                       className="cursor-pointer transition-colors hover:bg-navy-800/20"
                     >
                       <td className="max-w-[280px] px-5 py-3">

@@ -8,6 +8,8 @@ const adminNav = [
   { href: '/admin', label: 'ダッシュボード', exact: true },
   { href: '/admin/users', label: 'ユーザー管理', exact: false },
   { href: '/admin/knowledge', label: 'ナレッジ', exact: false },
+  { href: '/admin/persona', label: '人格設定', exact: false },
+  { href: '/admin/relationships', label: '接し方設定', exact: false },
 ]
 
 export function AdminSidebar() {
@@ -52,7 +54,7 @@ export function AdminSidebar() {
             Coming soon
           </p>
           <ul className="space-y-0.5">
-            {['人格設定', '接し方設定', '会話ログ', '変更履歴'].map((label) => (
+            {['会話ログ', '変更履歴'].map((label) => (
               <li key={label}>
                 <span className="block cursor-not-allowed rounded-md px-3 py-2 text-sm text-navy-700">
                   {label}
