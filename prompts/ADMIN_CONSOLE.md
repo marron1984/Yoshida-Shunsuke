@@ -1,206 +1,322 @@
 # ADMIN CONSOLE - 管理画面設計
 
-## 概要
-
-管理画面は、吉田俊輔本人（管理者）がOSの人格・記憶・ユーザーを管理するためのインターフェースです。
-静かな執務室のようなUIで、必要な操作を直感的に行えることを目指します。
+あなたは Yoshida Shunsuke OS の管理画面を設計・実装します。
+この管理画面は一般的な管理画面ではなく、吉田俊輔の分身OSを整備・育成・制御するための中枢画面です。
 
 ---
 
-## 管理画面の構成
+# 1. 管理画面の役割
 
-### 1. ダッシュボード（/admin）
-- 最近の会話アクティビティ
-- 新規ナレッジ候補の通知
-- システム状態の概要
+- 招待ユーザーを管理する
+- ナレッジを登録・編集する
+- 人格ルールを更新する
+- 相手ごとの接し方を調整する
+- 会話ログを確認する
+- OSの判断精度を高める
+- 将来的に死後も機能する人格資産を整備する
 
-### 2. 招待ユーザー管理（/admin/users）
+---
+
+# 2. 絶対要件
+
+- 管理画面にアクセスできるのは吉田俊輔本人のみ
+- 一般的なCRUD管理UIにしない
+- 静かな高級感と実務性を両立する
+
+---
+
+# 3. 技術要件
+
+- Next.js App Router
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- Zustand
+- Supabase
+
+---
+
+# 4. デザイン要件
+
+- 静か
+- 重厚
+- ミニマル
+- 高級感
+- 執務室
+- 編集室のような空気
+
+禁止:
+- 派手な色
+- ポップな管理UI
+- グラデーション過多
+- AIダッシュボードっぽいサイバー感
+
+---
+
+# 5. 管理画面の全体構成
+
+## 5-1. 管理画面トップ
+
+表示:
+- 利用者数
+- 会話総数
+- 直近7日間の会話件数
+- 最近更新されたナレッジ
+- 要見直しナレッジ
+- 最近の人格調整履歴
+- 最近の利用者追加・更新
+- 最近の重要会話ログ
+
+## 5-2. 招待ユーザー管理画面
+
 - ユーザー一覧
-- 招待コードの発行
-- 関係性カテゴリの設定
-- 個別メモの編集
-- ユーザーの有効化/無効化
+- 招待
+- 停止
+- 削除
+- 種別設定
+- メモ
+- 個別設定遷移
 
-### 3. ナレッジ管理（/admin/knowledge）
+ユーザー種別:
+- 事業責任者
+- 社内幹部
+- 家族
 
-#### ナレッジ一覧（/admin/knowledge）
-- 全ナレッジの一覧表示
-- カテゴリ・タグでのフィルタ
-- 検索機能
-- 重要度でのソート
+## 5-3. ナレッジ一覧画面
 
-#### ナレッジ登録（/admin/knowledge/new）
-- タイトル・本文の入力
-- カテゴリ選択
-- タグ付け
-- 関連人物の設定
-- 重要度の設定
-- プライバシー設定（公開範囲）
+表示項目:
+- タイトル
+- 分類
+- タグ
+- 対象相手
+- 優先度
+- 更新日時
+- 登録ソース
 
-#### ナレッジ詳細・編集（/admin/knowledge/:id）
-- ナレッジの閲覧・編集
-- 変更履歴の確認
-- 類似ナレッジの表示
-- 統合候補の表示
+機能:
+- 検索
+- フィルタ
+- ソート
+- 詳細遷移
 
-### 4. 人格設定（/admin/persona）
-- 基本トーンの調整
-- 禁止パターンの管理
-- 口調サンプルの確認・追加
+分類候補:
+- core_persona
+- judgment_rule
+- values_and_life_philosophy
+- relationship_rule
+- reply_style_pattern
+- crisis_response_rule
+- temporary_context
+- low_priority
 
-### 5. 相手別接し方設定（/admin/persona/relationships）
-- 関係性カテゴリごとのデフォルト設定
-- 個別ユーザーへのカスタム設定
-- トーンのプレビュー
+## 5-4. ナレッジ登録画面
 
-### 6. 会話ログ閲覧（/admin/conversations）
-- ユーザーごとの会話履歴
-- 検索・フィルタ
-- 応答品質の確認
+入力項目:
+- タイトル
+- 対象相手名
+- 対象相手カテゴリ
+- 原文
+- 要約
+- 分類
+- タグ
+- 優先度
+- 公開範囲
+- 登録ソース
+- 日付
+- 保存メモ
 
-### 7. 変更履歴（/admin/history）
-- ナレッジの変更履歴
-- 人格設定の変更履歴
-- システム設定の変更履歴
+要件:
+- 原文は長文をそのまま貼れる
+- 抽出候補を表示できる余地を残す
+- 人格へ反映する重要度スイッチを持たせる
+- 一時文脈としてのみ保存の切り替えを持たせる
 
----
+## 5-5. ナレッジ詳細・編集画面
 
-## UI設計思想
+- 原文
+- 構造化済み内容
+- タグ
+- 優先度
+- 分類
+- 対象相手
+- 作成日時
+- 更新日時
+- ソース
+- 管理メモ
 
-### ビジュアル
-- ダークトーンを基調
-- 余白を十分に取る
-- フォントはシンプルで読みやすいもの
-- 装飾は最小限
-- 静かで落ち着いた印象
+特別機能:
+- 類似ナレッジ表示
+- 重複候補表示
+- 統合候補表示
+- どの人格領域に効いているか可視化
 
-### インタラクション
-- 操作は直感的に
-- 確認ダイアログは必要最小限
-- 破壊的操作（削除など）のみ確認を求める
-- レスポンシブ対応
+## 5-6. 人格設定画面
 
-### レイアウト
-- サイドバー＋メインコンテンツの2カラム構成
-- サイドバーはナビゲーション
-- メインコンテンツは広く使う
+セクション:
+- コア人格
+- 判断基準
+- 人生観
+- 禁止事項
+- 返信文スタイル
+- トラブル初動ルール
+- 家族向け温度感
+- 幹部向け温度感
+- 事業責任者向け温度感
 
----
+巨大テキストエリア型ではなく、概念単位・ルール単位で編集できるUIにすること。
 
-## 権限管理
+## 5-7. 相手別接し方設定画面
 
-### 管理者（admin）
-- 全機能へのフルアクセス
-- ナレッジのCRUD
-- ユーザー管理
-- 人格設定の変更
-- 会話ログの閲覧
+- 基本トーン
+- 厳しさレベル
+- 共感の厚さ
+- 結論先行度
+- 接し方メモ
+- 注意点
+- 避けたい言い方
+- 話題制限
+- 参照許可範囲
 
-### 一般ユーザー（user）
-- チャット画面のみアクセス可能
-- 管理画面にはアクセス不可
-- 自身の会話履歴のみ参照可能
+機能:
+- スライダー
+- トグル
+- メモ欄
+- 最近の会話要約表示
+- 返答例プレビュー
 
----
+## 5-8. 会話ログ閲覧画面
 
-## データベース設計（Supabase）
+表示要素:
+- 相手名
+- 日時
+- モード
+- 会話本文
+- 使用された接し方ルール
+- 参照されたナレッジ
+- 管理メモ
 
-### テーブル概要
+機能:
+- 検索
+- 相手フィルタ
+- モードフィルタ
+- 期間フィルタ
+- 要見直しフラグ
+- ナレッジ化ボタン
+- 接し方設定へ反映ボタン
 
-#### users
-```sql
-- id: uuid (PK)
-- invite_code: text (UNIQUE)
-- display_name: text
-- relationship_category: text
-- relationship_memo: text
-- is_active: boolean
-- created_at: timestamptz
-- updated_at: timestamptz
-```
+## 5-9. 変更履歴画面
 
-#### knowledge
-```sql
-- id: uuid (PK)
-- title: text
-- content: text
-- category: text
-- tags: text[]
-- source: text
-- related_persons: text[]
-- emotional_context: text
-- importance: integer
-- is_private: boolean
-- visible_to: uuid[]
-- embedding: vector
-- created_at: timestamptz
-- updated_at: timestamptz
-```
-
-#### conversations
-```sql
-- id: uuid (PK)
-- user_id: uuid (FK -> users.id)
-- created_at: timestamptz
-- updated_at: timestamptz
-```
-
-#### messages
-```sql
-- id: uuid (PK)
-- conversation_id: uuid (FK -> conversations.id)
-- role: text ('user' | 'assistant')
-- content: text
-- created_at: timestamptz
-```
-
-#### knowledge_history
-```sql
-- id: uuid (PK)
-- knowledge_id: uuid (FK -> knowledge.id)
-- changed_by: uuid (FK -> users.id)
-- change_type: text ('create' | 'update' | 'delete')
-- previous_content: jsonb
-- new_content: jsonb
-- created_at: timestamptz
-```
-
-#### persona_settings
-```sql
-- id: uuid (PK)
-- setting_key: text
-- setting_value: jsonb
-- updated_by: uuid (FK -> users.id)
-- created_at: timestamptz
-- updated_at: timestamptz
-```
+- ナレッジ更新履歴
+- 人格設定更新履歴
+- 相手別設定更新履歴
+- ユーザー状態変更履歴
 
 ---
 
-## API設計概要
+# 6. 推奨レイアウト
 
-### ナレッジ関連
-- `GET /api/knowledge` — 一覧取得
-- `POST /api/knowledge` — 新規登録
-- `GET /api/knowledge/:id` — 詳細取得
-- `PUT /api/knowledge/:id` — 更新
-- `DELETE /api/knowledge/:id` — 削除
-- `GET /api/knowledge/:id/history` — 変更履歴
-- `GET /api/knowledge/:id/similar` — 類似ナレッジ
+左:
+- Dashboard
+- Users
+- Knowledge
+- Persona
+- Relationships
+- Conversations
+- History
 
-### ユーザー関連
-- `GET /api/users` — 一覧取得
-- `POST /api/users/invite` — 招待コード発行
-- `PUT /api/users/:id` — 更新
-- `DELETE /api/users/:id` — 無効化
+中央:
+- 概況カード
+- 最近の更新
+- 要対応項目
 
-### 会話関連
-- `GET /api/conversations` — 一覧取得
-- `GET /api/conversations/:id` — 詳細取得
-- `POST /api/conversations/:id/messages` — メッセージ送信
+右:
+- 最近の重要会話
+- 要見直しナレッジ
+- 管理メモ
 
-### 人格設定関連
-- `GET /api/persona` — 設定取得
-- `PUT /api/persona` — 設定更新
-- `GET /api/persona/relationships` — 関係性設定一覧
-- `PUT /api/persona/relationships/:category` — 関係性設定更新
+---
+
+# 7. コンポーネント設計
+
+- AdminSidebar
+- AdminHeader
+- StatCard
+- KnowledgeTable
+- KnowledgeEditor
+- UserTable
+- UserInviteDialog
+- PersonaSectionEditor
+- RelationshipSettingCard
+- ConversationLogViewer
+- ChangeHistoryTable
+- FilterBar
+- TagSelector
+- PriorityBadge
+- SourceBadge
+- ConfidenceBadge
+- RelatedKnowledgePanel
+
+---
+
+# 8. 情報設計ルール
+
+- 主語は人格精度
+- ナレッジは文章保管庫ではなく構造化資産
+- 会話ログは監視ではなく調整材料
+- 一人で深く扱いやすいことを優先
+
+---
+
+# 9. データモデル案
+
+- AdminUserView
+- KnowledgeItem
+- PersonaRule
+- RelationshipSetting
+- ConversationAudit
+- ChangeHistory
+
+---
+
+# 10. 優先実装順
+
+## Phase 1
+- 管理画面トップ
+- 招待ユーザー管理
+- ナレッジ一覧
+- ナレッジ登録
+
+## Phase 2
+- ナレッジ詳細・編集
+- 人格設定画面
+- 相手別接し方設定
+
+## Phase 3
+- 会話ログ閲覧
+- 変更履歴
+- 類似ナレッジ / 統合候補UI
+
+---
+
+# 11. UX品質の最終条件
+
+- 自分の分身を整える場所に感じられる
+- 静かだが緊張感がある
+- 情報が多いのに疲れない
+- 人格OSを育てている感覚がある
+
+---
+
+# 12. 出力形式
+
+- ディレクトリ構成
+- 各ページ構成
+- 必要コンポーネント一覧
+- 各コンポーネントのコード
+- 状態管理設計
+- 型定義
+- Supabase連携前提の設計
+- ダミーデータ
+- 実装手順
+- 必要な環境変数
+- ローカル実行方法
