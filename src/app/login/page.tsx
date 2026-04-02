@@ -36,7 +36,7 @@ export default function LoginPage() {
 
       // Phase 1: dummy login — will be replaced with Supabase OTP
       setUser(dummyUser)
-      router.push('/chat')
+      router.push('/home')
     } catch {
       setError('ログインリンクの送信に失敗しました')
     } finally {
