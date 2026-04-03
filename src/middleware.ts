@@ -1,21 +1,29 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { updateSession } from '@/lib/supabase/middleware'
 
 const PROTECTED_PATHS = ['/chat', '/home', '/admin']
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // Refresh Supabase session
+  const response = await updateSession(request)
+
   // Check for Supabase session cookies
-  const hasSupabaseSession =
-    request.cookies.has('sb-access-token') ||
-    request.cookies.has('sb-refresh-token') ||
-    Array.from(request.cookies.getAll()).some(
-      (c) => c.name.startsWith('sb-') && c.name.endsWith('-auth-token')
+  const hasSupabaseSession = request.cookies
+    .getAll()
+    .some(
+      (c) =>
+        c.name.startsWith('sb-') &&
+        (c.name.endsWith('-auth-token') ||
+          c.name.endsWith('-auth-token.0') ||
+          c.name.endsWith('-auth-token.1'))
     )
 
-  // Check for app-level auth cookie (set by dummy login)
-  const hasAppSession = request.cookies.get('yoshida-os-auth')?.value === 'true'
+  // Check for app-level auth cookie (fallback for demo without Supabase)
+  const hasAppSession =
+    request.cookies.get('yoshida-os-auth')?.value === 'true'
 
   const isAuthenticated = hasSupabaseSession || hasAppSession
 
@@ -30,7 +38,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/home', request.url))
   }
 
-  return NextResponse.next()
+  return response
 }
 
 export const config = {

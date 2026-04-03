@@ -8,21 +8,8 @@ import { ThreadList } from '@/components/chat/ThreadList'
 import { MessageArea } from '@/components/chat/MessageArea'
 import { ContextPanel } from '@/components/chat/ContextPanel'
 import { ModeSelector } from '@/components/chat/ModeSelector'
-import { dummyConversations, dummyMessages } from '@/lib/dummy-data'
+import { dummyConversations, dummyMessages, dummyRelationshipMemos } from '@/lib/dummy-data'
 import type { Message } from '@/types'
-
-const dummyResponses: Record<string, string> = {
-  consultation:
-    'なるほど、そういう状況か。\n\nまず整理しよう。いま一番大事なのは、全体を見て優先順位をつけることだと思う。全部同時にやろうとすると、どれも中途半端になるリスクがある。\n\nまず止血を優先して、そこから順番に取り組んでいこう。具体的にどこから手をつけるか、もう少し聞かせてもらっていい？',
-  judgment:
-    '結論から言うと、今の段階では見送った方がいいと思う。\n\n理由は2つ。まだ判断材料が揃っていないのと、急いで決めるメリットが薄い。\n\nただ、来週までに確認しておくべきことはある。それを整理して、改めて判断しよう。',
-  reply:
-    'こういう感じでどうだろう。\n\n「お世話になっております。ご連絡いただいた件、社内で確認のうえ、来週中にあらためてご回答させていただきます。恐れ入りますが、少々お待ちいただけますと幸いです。」\n\n相手との関係性を考えると、このくらいの温度感がちょうどいいと思う。もう少し砕けた方がいい？',
-  initial_response:
-    'まず落ち着こう。今やることを3つだけ整理する。\n\n1. 状況を正確に把握する\n2. 関係者に一報を入れる\n3. 次のアクションを決める\n\n原因究明は後でいい。今は止血に集中しよう。',
-  family:
-    'そうだったんだ。それはしんどかったよな。\n\n急いで答えを出さなくても大丈夫だよ。まずはゆっくり考えよう。\n\nそのうえで、僕はこう思うんだけど——無理にどうこうする必要はなくて、自分のペースで進めればいいと思う。',
-}
 
 export default function ChatPage() {
   const user = useAuthStore((s) => s.user)
@@ -70,7 +57,7 @@ export default function ChatPage() {
   }, [user, currentMode, createConversation, setMessages])
 
   const handleSend = useCallback(
-    (content: string) => {
+    async (content: string) => {
       const userMsg: Message = {
         id: `msg-${Date.now()}`,
         conversation_id: activeConversationId ?? '',
@@ -81,32 +68,65 @@ export default function ChatPage() {
       addMessage(userMsg)
       setGenerating(true)
 
-      setTimeout(() => {
+      try {
+        // Build conversation history for API
+        const history = [
+          ...messages.map((m) => ({ role: m.role, content: m.content })),
+          { role: 'user' as const, content },
+        ]
+
+        // Get relationship memo for context
+        const relMemo = user
+          ? dummyRelationshipMemos[user.id]
+          : undefined
+
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: history,
+            mode: currentMode,
+            relationship: user?.relationship_category ?? 'business_leader',
+            relationshipMemo: relMemo
+              ? `${relMemo.name}（${relMemo.category}）: ${relMemo.memo}\nトーン: ${relMemo.tone}\n注意: ${relMemo.caution}`
+              : undefined,
+          }),
+        })
+
+        const data = await res.json()
+
         const assistantMsg: Message = {
           id: `msg-${Date.now() + 1}`,
           conversation_id: activeConversationId ?? '',
           role: 'assistant',
-          content: dummyResponses[currentMode] ?? dummyResponses.consultation,
+          content: data.content ?? '応答の生成に失敗しました',
           created_at: new Date().toISOString(),
         }
         addMessage(assistantMsg)
+      } catch {
+        addMessage({
+          id: `msg-${Date.now() + 1}`,
+          conversation_id: activeConversationId ?? '',
+          role: 'assistant',
+          content: '通信エラーが発生しました。もう一度お試しください。',
+          created_at: new Date().toISOString(),
+        })
+      } finally {
         setGenerating(false)
-      }, 1500)
+      }
     },
-    [activeConversationId, addMessage, setGenerating, currentMode]
+    [activeConversationId, addMessage, setGenerating, currentMode, messages, user]
   )
 
   if (!user) return null
 
   return (
     <div className="flex h-full flex-col">
-      {/* Header */}
       <header className="flex items-center justify-between border-b border-navy-800 px-6 py-2.5">
         <ModeSelector />
         <span className="text-xs text-navy-500">{user.display_name}</span>
       </header>
 
-      {/* 3-column layout */}
       <div className="flex flex-1 overflow-hidden">
         <div className="w-64 shrink-0">
           <ThreadList conversations={conversations} onNewThread={handleNewThread} />
